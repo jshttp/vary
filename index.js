@@ -43,8 +43,19 @@ function vary(res, header) {
     ? val.join(', ')
     : String(val);
 
+  // existing unspecified vary
+  if (headers === '*') {
+    return;
+  }
+
   // enumerate current values
   var vals = headers.toLowerCase().split(/ *, */);
+
+  // unspecified vary
+  if (header === '*' || vals.indexOf('*') !== -1) {
+    res.setHeader('Vary', '*');
+    return;
+  }
 
   if (vals.indexOf(header.toLowerCase()) !== -1) {
     // already set

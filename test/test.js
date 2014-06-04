@@ -98,6 +98,33 @@ describe('vary(res, header)', function () {
       res.getHeader('Vary').should.equal('Accept, Accept-Encoding, origin');
     });
   });
+
+  describe('when Vary: *', function () {
+    it('should set value', function () {
+      var res = createRes();
+      vary(res, '*');
+      res.getHeader('Vary').should.equal('*');
+    });
+
+    it('should act as if all values alread set', function () {
+      var res = createRes({'vary': '*'});
+      vary(res, 'Origin');
+      vary(res, 'User-Agent');
+      res.getHeader('Vary').should.equal('*');
+    });
+
+    it('should erradicate existing values', function () {
+      var res = createRes({'vary': 'Accept, Accept-Encoding'});
+      vary(res, '*');
+      res.getHeader('Vary').should.equal('*');
+    });
+
+    it('should update bad existing header', function () {
+      var res = createRes({'vary': 'Accept, Accept-Encoding, *'});
+      vary(res, 'Origin');
+      res.getHeader('Vary').should.equal('*');
+    });
+  });
 });
 
 function createRes(headers) {
