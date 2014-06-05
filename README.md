@@ -18,9 +18,10 @@ $ npm install vary
 var vary = require('vary')
 ```
 
-### vary(res, header)
+### vary(res, field)
 
-Adds the given `header` to the `Vary` response header of `res`.
+Adds the given header `field` to the `Vary` response header of `res`.
+This can be a string of a single field or an array of multiple fields.
 
 This will append the header if not already listed, otherwise leaves
 it listed in the current location.
@@ -28,6 +29,7 @@ it listed in the current location.
 ```js
 vary(res, 'Origin')
 vary(res, 'User-Agent')
+vary(res, ['Accept', 'Accept-Language', 'Accept-Encoding'])
 ```
 
 ## Testing

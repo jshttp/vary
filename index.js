@@ -17,25 +17,31 @@ module.exports = vary;
 var separators = /[\(\)<>@,;:\\"\/\[\]\?=\{\}\u0020\u0009]/;
 
 /**
- * Mark that a request is varied on a header.
+ * Mark that a request is varied on a header field.
  *
  * @param {Object} res
- * @param {String} header
+ * @param {String|Array} field
  * @api public
  */
 
-function vary(res, header) {
+function vary(res, field) {
   if (!res || !res.getHeader || !res.setHeader) {
     // quack quack
     throw new TypeError('res argument is required');
   }
 
-  if (!header) {
-    throw new TypeError('header argument is required');
+  if (!field) {
+    throw new TypeError('field argument is required');
   }
 
-  if (separators.test(header)) {
-    throw new TypeError('header argument is not a valid header');
+  var fields = !Array.isArray(field)
+    ? [String(field)]
+    : field;
+
+  for (var i = 0; i < fields.length; i++) {
+    if (separators.test(fields[i])) {
+      throw new TypeError('field argument contains an invalid header');
+    }
   }
 
   var val = res.getHeader('Vary') || ''
@@ -52,20 +58,22 @@ function vary(res, header) {
   var vals = headers.toLowerCase().split(/ *, */);
 
   // unspecified vary
-  if (header === '*' || vals.indexOf('*') !== -1) {
+  if (fields.indexOf('*') !== -1 || vals.indexOf('*') !== -1) {
     res.setHeader('Vary', '*');
     return;
   }
 
-  if (vals.indexOf(header.toLowerCase()) !== -1) {
-    // already set
-    return;
+  for (var i = 0; i < fields.length; i++) {
+    field = fields[i].toLowerCase();
+
+    // append value (case-preserving)
+    if (vals.indexOf(field) === -1) {
+      vals.push(field);
+      headers = headers
+        ? headers + ', ' + fields[i]
+        : fields[i];
+    }
   }
 
-  // append value (case-preserving)
-  val = headers
-    ? headers + ', ' + header
-    : header;
-
-  res.setHeader('Vary', val);
+  res.setHeader('Vary', headers);
 }

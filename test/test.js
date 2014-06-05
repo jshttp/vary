@@ -14,16 +14,27 @@ describe('vary(res, header)', function () {
       });
     });
 
-    describe('header', function () {
+    describe('field', function () {
       it('should be required', function () {
         var res = createRes();
-        vary.bind(null, res).should.throw(/header.*required/);
+        vary.bind(null, res).should.throw(/field.*required/);
+      });
+
+      it('should accept string', function () {
+        var res = createRes();
+        vary.bind(null, res, 'foo').should.not.throw();
+      });
+
+      it('should accept array of string', function () {
+        var res = createRes();
+        vary.bind(null, res, ['foo', 'bar']).should.not.throw();
       });
 
       it('should not allow separators', function () {
         var res = createRes();
-        vary.bind(null, res, 'invalid:header').should.throw(/header.*not.*valid/);
-        vary.bind(null, res, 'invalid header').should.throw(/header.*not.*valid/);
+        vary.bind(null, res, 'invalid:header').should.throw(/field.*contains.*invalid/);
+        vary.bind(null, res, 'invalid header').should.throw(/field.*contains.*invalid/);
+        vary.bind(null, res, ['invalid header']).should.throw(/field.*contains.*invalid/);
       });
     });
   });
@@ -123,6 +134,38 @@ describe('vary(res, header)', function () {
       var res = createRes({'vary': 'Accept, Accept-Encoding, *'});
       vary(res, 'Origin');
       res.getHeader('Vary').should.equal('*');
+    });
+  });
+
+  describe('when fields is array', function () {
+    it('should set value', function () {
+      var res = createRes();
+      vary(res, ['Accept', 'Accept-Language']);
+      res.getHeader('Vary').should.equal('Accept, Accept-Language');
+    });
+
+    it('should ignore double-entries', function () {
+      var res = createRes();
+      vary(res, ['Accept', 'Accept']);
+      res.getHeader('Vary').should.equal('Accept');
+    });
+
+    it('should be case-insensitive', function () {
+      var res = createRes();
+      vary(res, ['Accept', 'ACCEPT']);
+      res.getHeader('Vary').should.equal('Accept');
+    });
+
+    it('should handle contained *', function () {
+      var res = createRes();
+      vary(res, ['Origin', 'User-Agent', '*', 'Accept']);
+      res.getHeader('Vary').should.equal('*');
+    });
+
+    it('should handle existing values', function () {
+      var res = createRes({'vary': 'Accept, Accept-Encoding'});
+      vary(res, ['origin', 'accept', 'accept-charset']);
+      res.getHeader('Vary').should.equal('Accept, Accept-Encoding, origin, accept-charset');
     });
   });
 });
