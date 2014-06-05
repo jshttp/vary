@@ -1,5 +1,5 @@
-unreleased
-==========
+0.1.0 / 2014-06-05
+==================
 
   * Support array of fields to set
 
