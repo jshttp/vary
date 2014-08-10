@@ -4,6 +4,7 @@
 [![Node.js Version](http://img.shields.io/badge/node.js->=_0.8-blue.svg)](http://nodejs.org/download/)
 [![Build Status](http://img.shields.io/travis/expressjs/vary.svg)](https://travis-ci.org/expressjs/vary)
 [![Coverage Status](https://img.shields.io/coveralls/expressjs/vary.svg)](https://coveralls.io/r/expressjs/vary)
+[![Gittip](http://img.shields.io/gittip/dougwilson.svg)](https://www.gittip.com/dougwilson/)
 
 Update the Vary header of a response
 
