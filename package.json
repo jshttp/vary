@@ -1,7 +1,7 @@
 {
   "name": "vary",
   "description": "Manipulate the HTTP Vary header",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
   "license": "MIT",
   "keywords": [
