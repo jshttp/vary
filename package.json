@@ -9,7 +9,7 @@
     "res",
     "vary"
   ],
-  "repository": "expressjs/vary",
+  "repository": "jshttp/vary",
   "devDependencies": {
     "istanbul": "0.3.0",
     "mocha": "~1.21.4",
