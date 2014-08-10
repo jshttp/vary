@@ -6,7 +6,7 @@
 [![Coverage Status](https://img.shields.io/coveralls/expressjs/vary.svg?style=flat)](https://coveralls.io/r/expressjs/vary)
 [![Gittip](http://img.shields.io/gittip/dougwilson.svg?style=flat)](https://www.gittip.com/dougwilson/)
 
-Update the Vary header of a response
+Manipulate the HTTP Vary header
 
 ## Install
 
