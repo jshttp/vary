@@ -35,7 +35,7 @@ vary(res, 'Origin')
 
 ### vary.append(header, field)
 
-Adds the given header `field` to the `Vary` response header string `header.
+Adds the given header `field` to the `Vary` response header string `header`.
 This can be a string of a single field or an array of multiple fields.
 
 This will append the header if not already listed, otherwise leaves
