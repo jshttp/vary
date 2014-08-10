@@ -37,7 +37,7 @@ function append(header, field) {
 
   // get fields array
   var fields = !Array.isArray(field)
-    ? [String(field)]
+    ? parse(String(field))
     : field;
 
   // assert on invalid fields
@@ -53,7 +53,7 @@ function append(header, field) {
   }
 
   // enumerate current values
-  var vals = header.toLowerCase().split(/ *, */);
+  var vals = parse(header.toLowerCase());
 
   // unspecified vary
   if (fields.indexOf('*') !== -1 || vals.indexOf('*') !== -1) {
@@ -73,6 +73,18 @@ function append(header, field) {
   }
 
   return header;
+}
+
+/**
+ * Parse a vary header into an array.
+ *
+ * @param {String} header
+ * @return {Array}
+ * @api private
+ */
+
+function parse(header) {
+  return header.trim().split(/ *, */);
 }
 
 /**

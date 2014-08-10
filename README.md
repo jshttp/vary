@@ -23,7 +23,8 @@ var vary = require('vary')
 ### vary(res, field)
 
 Adds the given header `field` to the `Vary` response header of `res`.
-This can be a string of a single field or an array of multiple fields.
+This can be a string of a single field, a string of a valid `Vary`
+header, or an array of multiple fields.
 
 This will append the header if not already listed, otherwise leaves
 it listed in the current location.
@@ -36,7 +37,8 @@ vary(res, 'Origin')
 ### vary.append(header, field)
 
 Adds the given header `field` to the `Vary` response header string `header`.
-This can be a string of a single field or an array of multiple fields.
+This can be a string of a single field, a string of a valid `Vary` header,
+or an array of multiple fields.
 
 This will append the header if not already listed, otherwise leaves
 it listed in the current location. The new header string is returned.

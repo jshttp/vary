@@ -35,6 +35,12 @@ describe('vary(res, field)', function () {
         .expect(200, done);
       });
 
+      it('should accept string that is Vary header', function (done) {
+        request(createServer(callVary('foo, bar')))
+        .get('/')
+        .expect(200, done);
+      });
+
       it('should not allow separator ":"', function (done) {
         request(createServer(callVary('invalid:header')))
         .get('/')
@@ -43,12 +49,6 @@ describe('vary(res, field)', function () {
 
       it('should not allow separator " "', function (done) {
         request(createServer(callVary('invalid header')))
-        .get('/')
-        .expect(500, /field.*contains.*invalid/, done);
-      });
-
-      it('should not allow separator ","', function (done) {
-        request(createServer(callVary('invalid,header')))
         .get('/')
         .expect(500, /field.*contains.*invalid/, done);
       });
@@ -166,7 +166,37 @@ describe('vary(res, field)', function () {
     });
   });
 
-  describe('when fields is array', function () {
+  describe('when field is string', function () {
+    it('should set value', function (done) {
+      request(createServer(callVary('Accept')))
+      .get('/')
+      .expect('Vary', 'Accept')
+      .expect(200, done);
+    });
+
+    it('should set value when vary header', function (done) {
+      request(createServer(callVary('Accept, Accept-Encoding')))
+      .get('/')
+      .expect('Vary', 'Accept, Accept-Encoding')
+      .expect(200, done);
+    });
+
+    it('should acept LWS', function (done) {
+      request(createServer(callVary('  Accept     ,     Origin    ')))
+      .get('/')
+      .expect('Vary', 'Accept, Origin')
+      .expect(200, done);
+    });
+
+    it('should handle contained *', function (done) {
+      request(createServer(callVary('Accept,*')))
+      .get('/')
+      .expect('Vary', '*')
+      .expect(200, done);
+    });
+  });
+
+  describe('when field is array', function () {
     it('should set value', function (done) {
       request(createServer(callVary(['Accept', 'Accept-Language'])))
       .get('/')
@@ -225,6 +255,10 @@ describe('vary.append(header, field)', function () {
         vary.append.bind(null, '', 'foo').should.not.throw();
       });
 
+      it('should accept string that is Vary header', function () {
+        vary.append.bind(null, '', 'foo, bar').should.not.throw();
+      });
+
       it('should accept array of string', function () {
         vary.append.bind(null, '', ['foo', 'bar']).should.not.throw();
       });
@@ -235,10 +269,6 @@ describe('vary.append(header, field)', function () {
 
       it('should not allow separator " "', function () {
         vary.append.bind(null, '', 'invalid header').should.throw(/field.*contains.*invalid/);
-      });
-
-      it('should not allow separator ","', function () {
-        vary.append.bind(null, '', 'invalid,header').should.throw(/field.*contains.*invalid/);
       });
     });
   });
@@ -297,7 +327,25 @@ describe('vary.append(header, field)', function () {
     });
   });
 
-  describe('when fields is array', function () {
+  describe('when field is string', function () {
+    it('should set value', function () {
+      vary.append('', 'Accept').should.equal('Accept');
+    });
+
+    it('should set value when vary header', function () {
+      vary.append('', 'Accept, Accept-Encoding').should.equal('Accept, Accept-Encoding');
+    });
+
+    it('should acept LWS', function () {
+      vary.append('', '  Accept     ,     Origin    ').should.equal('Accept, Origin');
+    });
+
+    it('should handle contained *', function () {
+      vary.append('', 'Accept,*').should.equal('*');
+    });
+  });
+
+  describe('when field is array', function () {
     it('should set value', function () {
       vary.append('', ['Accept', 'Accept-Language']).should.equal('Accept, Accept-Language');
     });
