@@ -29,9 +29,8 @@ This will append the header if not already listed, otherwise leaves
 it listed in the current location.
 
 ```js
+// Append "Origin" to the Vary header of the response
 vary(res, 'Origin')
-vary(res, 'User-Agent')
-vary(res, ['Accept', 'Accept-Language', 'Accept-Encoding'])
 ```
 
 ### vary.append(header, field)
