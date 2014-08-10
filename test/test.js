@@ -1,6 +1,8 @@
 
-var vary = require('..');
+var http = require('http');
+var request = require('supertest');
 var should = require('should');
+var vary = require('..');
 
 describe('vary(res, field)', function () {
   describe('arguments', function () {
@@ -15,157 +17,189 @@ describe('vary(res, field)', function () {
     });
 
     describe('field', function () {
-      it('should be required', function () {
-        var res = createRes();
-        vary.bind(null, res).should.throw(/field.*required/);
+      it('should be required', function (done) {
+        request(createServer(callVary()))
+        .get('/')
+        .expect(500, /field.*required/, done);
       });
 
-      it('should accept string', function () {
-        var res = createRes();
-        vary.bind(null, res, 'foo').should.not.throw();
+      it('should accept string', function (done) {
+        request(createServer(callVary('foo')))
+        .get('/')
+        .expect(200, done);
       });
 
-      it('should accept array of string', function () {
-        var res = createRes();
-        vary.bind(null, res, ['foo', 'bar']).should.not.throw();
+      it('should accept array of string', function (done) {
+        request(createServer(callVary(['foo', 'bar'])))
+        .get('/')
+        .expect(200, done);
       });
 
-      it('should not allow separators', function () {
-        var res = createRes();
-        vary.bind(null, res, 'invalid:header').should.throw(/field.*contains.*invalid/);
-        vary.bind(null, res, 'invalid header').should.throw(/field.*contains.*invalid/);
-        vary.bind(null, res, ['invalid header']).should.throw(/field.*contains.*invalid/);
+      it('should not allow separator ":"', function (done) {
+        request(createServer(callVary('invalid:header')))
+        .get('/')
+        .expect(500, /field.*contains.*invalid/, done);
+      });
+
+      it('should not allow separator " "', function (done) {
+        request(createServer(callVary('invalid header')))
+        .get('/')
+        .expect(500, /field.*contains.*invalid/, done);
+      });
+
+      it('should not allow separator ","', function (done) {
+        request(createServer(callVary('invalid,header')))
+        .get('/')
+        .expect(500, /field.*contains.*invalid/, done);
       });
     });
   });
 
   describe('when no Vary', function () {
-    it('should set value', function () {
-      var res = createRes();
-      vary(res, 'Origin');
-      res.getHeader('Vary').should.equal('Origin');
+    it('should set value', function (done) {
+      request(createServer(callVary('Origin')))
+      .get('/')
+      .expect('Vary', 'Origin')
+      .expect(200, done);
     });
 
-    it('should set value with multiple calls', function () {
-      var res = createRes();
-      vary(res, 'Origin');
-      vary(res, 'User-Agent');
-      res.getHeader('Vary').should.equal('Origin, User-Agent');
+    it('should set value with multiple calls', function (done) {
+      request(createServer(callVary(['Origin', 'User-Agent'])))
+      .get('/')
+      .expect('Vary', 'Origin, User-Agent')
+      .expect(200, done);
     });
 
-    it('should preserve case', function () {
-      var res = createRes();
-      vary(res, 'ORIGIN');
-      vary(res, 'user-agent');
-      vary(res, 'AccepT');
-      res.getHeader('Vary').should.equal('ORIGIN, user-agent, AccepT');
+    it('should preserve case', function (done) {
+      request(createServer(callVary(['ORIGIN', 'user-agent', 'AccepT'])))
+      .get('/')
+      .expect('Vary', 'ORIGIN, user-agent, AccepT')
+      .expect(200, done);
     });
   });
 
   describe('when existing Vary', function () {
-    it('should set value', function () {
-      var res = createRes({'vary': 'Accept'});
-      vary(res, 'Origin');
-      res.getHeader('Vary').should.equal('Accept, Origin');
+    it('should set value', function (done) {
+      request(createServer(alterVary('Accept', 'Origin')))
+      .get('/')
+      .expect('Vary', 'Accept, Origin')
+      .expect(200, done);
     });
 
-    it('should set value with multiple calls', function () {
-      var res = createRes({'vary': 'Accept'});
-      vary(res, 'Origin');
-      vary(res, 'User-Agent');
-      res.getHeader('Vary').should.equal('Accept, Origin, User-Agent');
+    it('should set value with multiple calls', function (done) {
+      var server = createServer(function (req, res) {
+       res.setHeader('Vary', 'Accept');
+       vary(res, 'Origin');
+       vary(res, 'User-Agent');
+      });
+      request(server)
+      .get('/')
+      .expect('Vary', 'Accept, Origin, User-Agent')
+      .expect(200, done);
     });
 
-    it('should not duplicate existing value', function () {
-      var res = createRes({'vary': 'Accept'});
-      vary(res, 'Accept');
-      res.getHeader('Vary').should.equal('Accept');
+    it('should not duplicate existing value', function (done) {
+      request(createServer(alterVary('Accept', 'Accept')))
+      .get('/')
+      .expect('Vary', 'Accept')
+      .expect(200, done);
     });
 
-    it('should compare case-insensitive', function () {
-      var res = createRes({'vary': 'Accept'});
-      vary(res, 'accEPT');
-      res.getHeader('Vary').should.equal('Accept');
+    it('should compare case-insensitive', function (done) {
+      request(createServer(alterVary('Accept', 'accEPT')))
+      .get('/')
+      .expect('Vary', 'Accept')
+      .expect(200, done);
     });
 
-    it('should preserve case', function () {
-      var res = createRes({'vary': 'Accept'});
-      vary(res, 'AccepT');
-      res.getHeader('Vary').should.equal('Accept');
+    it('should preserve case', function (done) {
+      request(createServer(alterVary('AccepT', ['accEPT', 'ORIGIN'])))
+      .get('/')
+      .expect('Vary', 'AccepT, ORIGIN')
+      .expect(200, done);
     });
   });
 
   describe('when existing Vary as array', function () {
-    it('should set value', function () {
-      var res = createRes({'vary': ['Accept', 'Accept-Encoding']});
-      vary(res, 'Origin');
-      res.getHeader('Vary').should.equal('Accept, Accept-Encoding, Origin');
+    it('should set value', function (done) {
+      request(createServer(alterVary(['Accept', 'Accept-Encoding'], 'Origin')))
+      .get('/')
+      .expect('Vary', 'Accept, Accept-Encoding, Origin')
+      .expect(200, done);
     });
 
-    it('should not duplicate existing value', function () {
-      var res = createRes({'vary': ['Accept', 'Accept-Encoding']});
-      vary(res, 'accept');
-      vary(res, 'origin');
-      res.getHeader('Vary').should.equal('Accept, Accept-Encoding, origin');
+    it('should not duplicate existing value', function (done) {
+      request(createServer(alterVary(['Accept', 'Accept-Encoding'], ['accept', 'origin'])))
+      .get('/')
+      .expect('Vary', 'Accept, Accept-Encoding, origin')
+      .expect(200, done);
     });
   });
 
   describe('when Vary: *', function () {
-    it('should set value', function () {
-      var res = createRes();
-      vary(res, '*');
-      res.getHeader('Vary').should.equal('*');
+    it('should set value', function (done) {
+      request(createServer(callVary('*')))
+      .get('/')
+      .expect('Vary', '*')
+      .expect(200, done);
     });
 
-    it('should act as if all values alread set', function () {
-      var res = createRes({'vary': '*'});
-      vary(res, 'Origin');
-      vary(res, 'User-Agent');
-      res.getHeader('Vary').should.equal('*');
+    it('should act as if all values alread set', function (done) {
+      request(createServer(alterVary('*', ['Origin', 'User-Agent'])))
+      .get('/')
+      .expect('Vary', '*')
+      .expect(200, done);
     });
 
-    it('should erradicate existing values', function () {
-      var res = createRes({'vary': 'Accept, Accept-Encoding'});
-      vary(res, '*');
-      res.getHeader('Vary').should.equal('*');
+    it('should erradicate existing values', function (done) {
+      request(createServer(alterVary('Accept, Accept-Encoding', '*')))
+      .get('/')
+      .expect('Vary', '*')
+      .expect(200, done);
     });
 
-    it('should update bad existing header', function () {
-      var res = createRes({'vary': 'Accept, Accept-Encoding, *'});
-      vary(res, 'Origin');
-      res.getHeader('Vary').should.equal('*');
+    it('should update bad existing header', function (done) {
+      request(createServer(alterVary('Accept, Accept-Encoding, *', 'Origin')))
+      .get('/')
+      .expect('Vary', '*')
+      .expect(200, done);
     });
   });
 
   describe('when fields is array', function () {
-    it('should set value', function () {
-      var res = createRes();
-      vary(res, ['Accept', 'Accept-Language']);
-      res.getHeader('Vary').should.equal('Accept, Accept-Language');
+    it('should set value', function (done) {
+      request(createServer(callVary(['Accept', 'Accept-Language'])))
+      .get('/')
+      .expect('Vary', 'Accept, Accept-Language')
+      .expect(200, done);
     });
 
-    it('should ignore double-entries', function () {
-      var res = createRes();
-      vary(res, ['Accept', 'Accept']);
-      res.getHeader('Vary').should.equal('Accept');
+    it('should ignore double-entries', function (done) {
+      request(createServer(callVary(['Accept', 'Accept'])))
+      .get('/')
+      .expect('Vary', 'Accept')
+      .expect(200, done);
     });
 
-    it('should be case-insensitive', function () {
-      var res = createRes();
-      vary(res, ['Accept', 'ACCEPT']);
-      res.getHeader('Vary').should.equal('Accept');
+    it('should be case-insensitive', function (done) {
+      request(createServer(callVary(['Accept', 'ACCEPT'])))
+      .get('/')
+      .expect('Vary', 'Accept')
+      .expect(200, done);
     });
 
-    it('should handle contained *', function () {
-      var res = createRes();
-      vary(res, ['Origin', 'User-Agent', '*', 'Accept']);
-      res.getHeader('Vary').should.equal('*');
+    it('should handle contained *', function (done) {
+      request(createServer(callVary(['Origin', 'User-Agent', '*', 'Accept'])))
+      .get('/')
+      .expect('Vary', '*')
+      .expect(200, done);
     });
 
-    it('should handle existing values', function () {
-      var res = createRes({'vary': 'Accept, Accept-Encoding'});
-      vary(res, ['origin', 'accept', 'accept-charset']);
-      res.getHeader('Vary').should.equal('Accept, Accept-Encoding, origin, accept-charset');
+    it('should handle existing values', function (done) {
+      request(createServer(alterVary('Accept, Accept-Encoding', ['origin', 'accept', 'accept-charset'])))
+      .get('/')
+      .expect('Vary', 'Accept, Accept-Encoding, origin, accept-charset')
+      .expect(200, done);
     });
   });
 });
@@ -195,10 +229,16 @@ describe('vary.append(header, field)', function () {
         vary.append.bind(null, '', ['foo', 'bar']).should.not.throw();
       });
 
-      it('should not allow separators', function () {
+      it('should not allow separator ":"', function () {
         vary.append.bind(null, '', 'invalid:header').should.throw(/field.*contains.*invalid/);
+      });
+
+      it('should not allow separator " "', function () {
         vary.append.bind(null, '', 'invalid header').should.throw(/field.*contains.*invalid/);
-        vary.append.bind(null, '', ['invalid header']).should.throw(/field.*contains.*invalid/);
+      });
+
+      it('should not allow separator ","', function () {
+        vary.append.bind(null, '', 'invalid,header').should.throw(/field.*contains.*invalid/);
       });
     });
   });
@@ -280,19 +320,29 @@ describe('vary.append(header, field)', function () {
   });
 });
 
-function createRes(headers) {
-  var _headers = {};
-
-  for (var key in headers) {
-    _headers[key.toLowerCase()] = headers[key];
-  }
-
-  return {
-    getHeader: function (name) {
-      return _headers[name.toLowerCase()];
-    },
-    setHeader: function (name, val) {
-      _headers[name.toLowerCase()] = val;
-    }
+function alterVary(header, field) {
+  return function call(req, res) {
+    res.setHeader('Vary', header);
+    vary(res, field);
   };
+}
+
+function callVary(field) {
+  return function call(req, res) {
+    vary(res, field);
+  };
+}
+
+function createServer(fn) {
+  return http.createServer(function onRequest(req, res) {
+    try {
+      fn(req, res);
+      res.statusCode = 200;
+    } catch (err) {
+      res.statusCode = 500;
+      res.write(err.message);
+    } finally {
+      res.end();
+    }
+  });
 }
