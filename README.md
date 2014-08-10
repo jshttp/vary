@@ -1,8 +1,8 @@
 # vary
 
-[![NPM version](https://badge.fury.io/js/vary.svg)](http://badge.fury.io/js/vary)
-[![Build Status](https://travis-ci.org/expressjs/vary.svg?branch=master)](https://travis-ci.org/expressjs/vary)
-[![Coverage Status](https://img.shields.io/coveralls/expressjs/vary.svg?branch=master)](https://coveralls.io/r/expressjs/vary)
+[![NPM Version](http://img.shields.io/npm/v/vary.svg)](https://www.npmjs.org/package/vary)
+[![Build Status](http://img.shields.io/travis/expressjs/vary.svg)](https://travis-ci.org/expressjs/vary)
+[![Coverage Status](https://img.shields.io/coveralls/expressjs/vary.svg)](https://coveralls.io/r/expressjs/vary)
 
 Update the Vary header of a response
 
