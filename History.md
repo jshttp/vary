@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * Add `vary.append` for low-level string manipulation
+
 0.1.0 / 2014-06-05
 ==================
 

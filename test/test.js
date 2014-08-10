@@ -2,7 +2,7 @@
 var vary = require('..');
 var should = require('should');
 
-describe('vary(res, header)', function () {
+describe('vary(res, field)', function () {
   describe('arguments', function () {
     describe('res', function () {
       it('should be required', function () {
@@ -166,6 +166,116 @@ describe('vary(res, header)', function () {
       var res = createRes({'vary': 'Accept, Accept-Encoding'});
       vary(res, ['origin', 'accept', 'accept-charset']);
       res.getHeader('Vary').should.equal('Accept, Accept-Encoding, origin, accept-charset');
+    });
+  });
+});
+
+describe('vary.append(header, field)', function () {
+  describe('arguments', function () {
+    describe('header', function () {
+      it('should be required', function () {
+        vary.append.bind().should.throw(/header.*required/);
+      });
+
+      it('should be a string', function () {
+        vary.append.bind(null, 42).should.throw(/header.*required/);
+      });
+    });
+
+    describe('field', function () {
+      it('should be required', function () {
+        vary.append.bind(null, '').should.throw(/field.*required/);
+      });
+
+      it('should accept string', function () {
+        vary.append.bind(null, '', 'foo').should.not.throw();
+      });
+
+      it('should accept array of string', function () {
+        vary.append.bind(null, '', ['foo', 'bar']).should.not.throw();
+      });
+
+      it('should not allow separators', function () {
+        vary.append.bind(null, '', 'invalid:header').should.throw(/field.*contains.*invalid/);
+        vary.append.bind(null, '', 'invalid header').should.throw(/field.*contains.*invalid/);
+        vary.append.bind(null, '', ['invalid header']).should.throw(/field.*contains.*invalid/);
+      });
+    });
+  });
+
+  describe('when header empty', function () {
+    it('should set value', function () {
+      vary.append('', 'Origin').should.equal('Origin');
+    });
+
+    it('should set value with array', function () {
+      vary.append('', ['Origin', 'User-Agent']).should.equal('Origin, User-Agent');
+    });
+
+    it('should preserve case', function () {
+      vary.append('', ['ORIGIN', 'user-agent', 'AccepT']).should.equal('ORIGIN, user-agent, AccepT');
+    });
+  });
+
+  describe('when header has values', function () {
+    it('should set value', function () {
+      vary.append('Accept', 'Origin').should.equal('Accept, Origin');
+    });
+
+    it('should set value with array', function () {
+      vary.append('Accept', ['Origin', 'User-Agent']).should.equal('Accept, Origin, User-Agent');
+    });
+
+    it('should not duplicate existing value', function () {
+      vary.append('Accept', 'Accept').should.equal('Accept');
+    });
+
+    it('should compare case-insensitive', function () {
+      vary.append('Accept', 'accEPT').should.equal('Accept');
+    });
+
+    it('should preserve case', function () {
+      vary.append('Accept', 'AccepT').should.equal('Accept');
+    });
+  });
+
+  describe('when *', function () {
+    it('should set value', function () {
+      vary.append('', '*').should.equal('*');
+    });
+
+    it('should act as if all values already set', function () {
+      vary.append('*', 'Origin').should.equal('*');
+    });
+
+    it('should erradicate existing values', function () {
+      vary.append('Accept, Accept-Encoding', '*').should.equal('*');
+    });
+
+    it('should update bad existing header', function () {
+      vary.append('Accept, Accept-Encoding, *', 'Origin').should.equal('*');
+    });
+  });
+
+  describe('when fields is array', function () {
+    it('should set value', function () {
+      vary.append('', ['Accept', 'Accept-Language']).should.equal('Accept, Accept-Language');
+    });
+
+    it('should ignore double-entries', function () {
+      vary.append('', ['Accept', 'Accept']).should.equal('Accept');
+    });
+
+    it('should be case-insensitive', function () {
+      vary.append('', ['Accept', 'ACCEPT']).should.equal('Accept');
+    });
+
+    it('should handle contained *', function () {
+      vary.append('', ['Origin', 'User-Agent', '*', 'Accept']).should.equal('*');
+    });
+
+    it('should handle existing values', function () {
+      vary.append('Accept, Accept-Encoding', ['origin', 'accept', 'accept-charset']).should.equal('Accept, Accept-Encoding, origin, accept-charset');
     });
   });
 });

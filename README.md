@@ -34,6 +34,19 @@ vary(res, 'User-Agent')
 vary(res, ['Accept', 'Accept-Language', 'Accept-Encoding'])
 ```
 
+### vary.append(header, field)
+
+Adds the given header `field` to the `Vary` response header string `header.
+This can be a string of a single field or an array of multiple fields.
+
+This will append the header if not already listed, otherwise leaves
+it listed in the current location. The new header string is returned.
+
+```js
+// Get header string appending "Origin" to "Accept, User-Agent"
+vary.append('Accept, User-Agent', 'Origin')
+```
+
 ## Testing
 
 ```sh
