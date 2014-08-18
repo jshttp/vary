@@ -1,12 +1,14 @@
 # vary
 
+Manipulate the HTTP Vary header
+
+<a href="https://jshttp.githup.io"><img src="https://jshttp.github.io/jshttp.svg" height="60px" border="0"></a>
+
 [![NPM Version](http://img.shields.io/npm/v/vary.svg?style=flat)](https://www.npmjs.org/package/vary)
 [![NPM Downloads](https://img.shields.io/npm/dm/vary.svg?style=flat)](https://www.npmjs.org/package/vary)
 [![Node.js Version](http://img.shields.io/badge/node.js->=_0.8-brightgreen.svg?style=flat)](http://nodejs.org/download/)
 [![Build Status](http://img.shields.io/travis/jshttp/vary.svg?style=flat)](https://travis-ci.org/jshttp/vary)
 [![Coverage Status](https://img.shields.io/coveralls/jshttp/vary.svg?style=flat)](https://coveralls.io/r/jshttp/vary)
-
-Manipulate the HTTP Vary header
 
 ## Installation
 
