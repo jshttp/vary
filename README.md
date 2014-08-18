@@ -1,3 +1,5 @@
+<a href="https://jshttp.githup.io"><img src="https://jshttp.github.io/jshttp.svg" height="60px" border="0"></a>
+
 # vary
 
 [![NPM Version](http://img.shields.io/npm/v/vary.svg?style=flat)](https://www.npmjs.org/package/vary)
