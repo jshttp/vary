@@ -8,7 +8,7 @@
 
 Manipulate the HTTP Vary header
 
-## Install
+## Installation
 
 ```sh
 $ npm install vary
