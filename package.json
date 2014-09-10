@@ -13,7 +13,6 @@
   "devDependencies": {
     "istanbul": "0.3.2",
     "mocha": "~1.21.4",
-    "should": "~4.0.4",
     "supertest": "~0.13.0"
   },
   "files": [
@@ -23,7 +22,7 @@
     "index.js"
   ],
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 0.8"
   },
   "scripts": {
     "test": "mocha --reporter spec --bail --check-leaks test/",

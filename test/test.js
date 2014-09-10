@@ -1,18 +1,18 @@
 
+var assert = require('assert');
 var http = require('http');
 var request = require('supertest');
-var should = require('should');
 var vary = require('..');
 
 describe('vary(res, field)', function () {
   describe('arguments', function () {
     describe('res', function () {
       it('should be required', function () {
-        vary.bind().should.throw(/res.*required/);
+        assert.throws(vary.bind(), /res.*required/);
       });
 
       it('should not allow non-res-like objects', function () {
-        vary.bind(null, {}).should.throw(/res.*required/);
+        assert.throws(vary.bind(null, {}), /res.*required/);
       });
     });
 
@@ -238,132 +238,132 @@ describe('vary.append(header, field)', function () {
   describe('arguments', function () {
     describe('header', function () {
       it('should be required', function () {
-        vary.append.bind().should.throw(/header.*required/);
+        assert.throws(vary.append.bind(), /header.*required/);
       });
 
       it('should be a string', function () {
-        vary.append.bind(null, 42).should.throw(/header.*required/);
+        assert.throws(vary.append.bind(null, 42), /header.*required/);
       });
     });
 
     describe('field', function () {
       it('should be required', function () {
-        vary.append.bind(null, '').should.throw(/field.*required/);
+        assert.throws(vary.append.bind(null, ''), /field.*required/);
       });
 
       it('should accept string', function () {
-        vary.append.bind(null, '', 'foo').should.not.throw();
+        assert.doesNotThrow(vary.append.bind(null, '', 'foo'));
       });
 
       it('should accept string that is Vary header', function () {
-        vary.append.bind(null, '', 'foo, bar').should.not.throw();
+        assert.doesNotThrow(vary.append.bind(null, '', 'foo, bar'));
       });
 
       it('should accept array of string', function () {
-        vary.append.bind(null, '', ['foo', 'bar']).should.not.throw();
+        assert.doesNotThrow(vary.append.bind(null, '', ['foo', 'bar']));
       });
 
       it('should not allow separator ":"', function () {
-        vary.append.bind(null, '', 'invalid:header').should.throw(/field.*contains.*invalid/);
+        assert.throws(vary.append.bind(null, '', 'invalid:header'), /field.*contains.*invalid/);
       });
 
       it('should not allow separator " "', function () {
-        vary.append.bind(null, '', 'invalid header').should.throw(/field.*contains.*invalid/);
+        assert.throws(vary.append.bind(null, '', 'invalid header'), /field.*contains.*invalid/);
       });
     });
   });
 
   describe('when header empty', function () {
     it('should set value', function () {
-      vary.append('', 'Origin').should.equal('Origin');
+      assert.equal(vary.append('', 'Origin'), 'Origin');
     });
 
     it('should set value with array', function () {
-      vary.append('', ['Origin', 'User-Agent']).should.equal('Origin, User-Agent');
+      assert.equal(vary.append('', ['Origin', 'User-Agent']), 'Origin, User-Agent');
     });
 
     it('should preserve case', function () {
-      vary.append('', ['ORIGIN', 'user-agent', 'AccepT']).should.equal('ORIGIN, user-agent, AccepT');
+      assert.equal(vary.append('', ['ORIGIN', 'user-agent', 'AccepT']), 'ORIGIN, user-agent, AccepT');
     });
   });
 
   describe('when header has values', function () {
     it('should set value', function () {
-      vary.append('Accept', 'Origin').should.equal('Accept, Origin');
+      assert.equal(vary.append('Accept', 'Origin'), 'Accept, Origin');
     });
 
     it('should set value with array', function () {
-      vary.append('Accept', ['Origin', 'User-Agent']).should.equal('Accept, Origin, User-Agent');
+      assert.equal(vary.append('Accept', ['Origin', 'User-Agent']), 'Accept, Origin, User-Agent');
     });
 
     it('should not duplicate existing value', function () {
-      vary.append('Accept', 'Accept').should.equal('Accept');
+      assert.equal(vary.append('Accept', 'Accept'), 'Accept');
     });
 
     it('should compare case-insensitive', function () {
-      vary.append('Accept', 'accEPT').should.equal('Accept');
+      assert.equal(vary.append('Accept', 'accEPT'), 'Accept');
     });
 
     it('should preserve case', function () {
-      vary.append('Accept', 'AccepT').should.equal('Accept');
+      assert.equal(vary.append('Accept', 'AccepT'), 'Accept');
     });
   });
 
   describe('when *', function () {
     it('should set value', function () {
-      vary.append('', '*').should.equal('*');
+      assert.equal(vary.append('', '*'), '*');
     });
 
     it('should act as if all values already set', function () {
-      vary.append('*', 'Origin').should.equal('*');
+      assert.equal(vary.append('*', 'Origin'), '*');
     });
 
     it('should erradicate existing values', function () {
-      vary.append('Accept, Accept-Encoding', '*').should.equal('*');
+      assert.equal(vary.append('Accept, Accept-Encoding', '*'), '*');
     });
 
     it('should update bad existing header', function () {
-      vary.append('Accept, Accept-Encoding, *', 'Origin').should.equal('*');
+      assert.equal(vary.append('Accept, Accept-Encoding, *', 'Origin'), '*');
     });
   });
 
   describe('when field is string', function () {
     it('should set value', function () {
-      vary.append('', 'Accept').should.equal('Accept');
+      assert.equal(vary.append('', 'Accept'), 'Accept');
     });
 
     it('should set value when vary header', function () {
-      vary.append('', 'Accept, Accept-Encoding').should.equal('Accept, Accept-Encoding');
+      assert.equal(vary.append('', 'Accept, Accept-Encoding'), 'Accept, Accept-Encoding');
     });
 
     it('should acept LWS', function () {
-      vary.append('', '  Accept     ,     Origin    ').should.equal('Accept, Origin');
+      assert.equal(vary.append('', '  Accept     ,     Origin    '), 'Accept, Origin');
     });
 
     it('should handle contained *', function () {
-      vary.append('', 'Accept,*').should.equal('*');
+      assert.equal(vary.append('', 'Accept,*'), '*');
     });
   });
 
   describe('when field is array', function () {
     it('should set value', function () {
-      vary.append('', ['Accept', 'Accept-Language']).should.equal('Accept, Accept-Language');
+      assert.equal(vary.append('', ['Accept', 'Accept-Language']), 'Accept, Accept-Language');
     });
 
     it('should ignore double-entries', function () {
-      vary.append('', ['Accept', 'Accept']).should.equal('Accept');
+      assert.equal(vary.append('', ['Accept', 'Accept']), 'Accept');
     });
 
     it('should be case-insensitive', function () {
-      vary.append('', ['Accept', 'ACCEPT']).should.equal('Accept');
+      assert.equal(vary.append('', ['Accept', 'ACCEPT']), 'Accept');
     });
 
     it('should handle contained *', function () {
-      vary.append('', ['Origin', 'User-Agent', '*', 'Accept']).should.equal('*');
+      assert.equal(vary.append('', ['Origin', 'User-Agent', '*', 'Accept']), '*');
     });
 
     it('should handle existing values', function () {
-      vary.append('Accept, Accept-Encoding', ['origin', 'accept', 'accept-charset']).should.equal('Accept, Accept-Encoding, origin, accept-charset');
+      assert.equal(vary.append('Accept, Accept-Encoding', ['origin', 'accept', 'accept-charset']), 'Accept, Accept-Encoding, origin, accept-charset');
     });
   });
 });
