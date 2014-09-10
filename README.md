@@ -1,10 +1,10 @@
 # vary
 
-[![NPM Version](http://img.shields.io/npm/v/vary.svg?style=flat)](https://www.npmjs.org/package/vary)
-[![NPM Downloads](https://img.shields.io/npm/dm/vary.svg?style=flat)](https://www.npmjs.org/package/vary)
-[![Node.js Version](http://img.shields.io/badge/node.js->=_0.8-brightgreen.svg?style=flat)](http://nodejs.org/download/)
-[![Build Status](http://img.shields.io/travis/jshttp/vary.svg?style=flat)](https://travis-ci.org/jshttp/vary)
-[![Coverage Status](https://img.shields.io/coveralls/jshttp/vary.svg?style=flat)](https://coveralls.io/r/jshttp/vary)
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![Node.js Version][node-version-image]][node-version-url]
+[![Build Status][travis-image]][travis-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
 
 Manipulate the HTTP Vary header
 
@@ -78,3 +78,14 @@ $ npm test
 ## License
 
 [MIT](LICENSE)
+
+[npm-image]: https://img.shields.io/npm/v/vary.svg?style=flat
+[npm-url]: https://npmjs.org/package/vary
+[node-version-image]: https://img.shields.io/node/v/vary.svg?style=flat
+[node-version-url]: http://nodejs.org/download/
+[travis-image]: https://img.shields.io/travis/jshttp/vary.svg?style=flat
+[travis-url]: https://travis-ci.org/jshttp/vary
+[coveralls-image]: https://img.shields.io/coveralls/jshttp/vary.svg?style=flat
+[coveralls-url]: https://coveralls.io/r/jshttp/vary
+[downloads-image]: https://img.shields.io/npm/dm/vary.svg?style=flat
+[downloads-url]: https://npmjs.org/package/vary
