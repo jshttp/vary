@@ -79,13 +79,13 @@ $ npm test
 
 [MIT](LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/vary.svg?style=flat
+[npm-image]: https://img.shields.io/npm/v/vary.svg
 [npm-url]: https://npmjs.org/package/vary
-[node-version-image]: https://img.shields.io/node/v/vary.svg?style=flat
+[node-version-image]: https://img.shields.io/node/v/vary.svg
 [node-version-url]: http://nodejs.org/download/
-[travis-image]: https://img.shields.io/travis/jshttp/vary.svg?style=flat
+[travis-image]: https://img.shields.io/travis/jshttp/vary/master.svg
 [travis-url]: https://travis-ci.org/jshttp/vary
-[coveralls-image]: https://img.shields.io/coveralls/jshttp/vary.svg?style=flat
+[coveralls-image]: https://img.shields.io/coveralls/jshttp/vary/master.svg
 [coveralls-url]: https://coveralls.io/r/jshttp/vary
-[downloads-image]: https://img.shields.io/npm/dm/vary.svg?style=flat
+[downloads-image]: https://img.shields.io/npm/dm/vary.svg
 [downloads-url]: https://npmjs.org/package/vary
