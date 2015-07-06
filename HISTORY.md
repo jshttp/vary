@@ -3,6 +3,7 @@ unreleased
 
   * Fix setting empty header from empty `field`
   * perf: enable strict mode
+  * perf: remove argument reassignments
 
 1.0.0 / 2014-08-10
 ==================

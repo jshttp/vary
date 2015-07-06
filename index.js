@@ -55,6 +55,7 @@ function append(header, field) {
   }
 
   // enumerate current values
+  var val = header;
   var vals = parse(header.toLowerCase());
 
   // unspecified vary
@@ -63,18 +64,18 @@ function append(header, field) {
   }
 
   for (var i = 0; i < fields.length; i++) {
-    field = fields[i].toLowerCase();
+    var fld = fields[i].toLowerCase();
 
     // append value (case-preserving)
-    if (vals.indexOf(field) === -1) {
-      vals.push(field);
-      header = header
-        ? header + ', ' + fields[i]
+    if (vals.indexOf(fld) === -1) {
+      vals.push(fld);
+      val = val
+        ? val + ', ' + fields[i]
         : fields[i];
     }
   }
 
-  return header;
+  return val;
 }
 
 /**
