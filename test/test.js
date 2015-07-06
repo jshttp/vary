@@ -76,6 +76,13 @@ describe('vary(res, field)', function () {
       .expect('Vary', 'ORIGIN, user-agent, AccepT')
       .expect(200, done);
     });
+
+    it('should not set Vary on empty array', function (done) {
+      request(createServer(callVary([])))
+      .get('/')
+      .expect(shouldNotHaveHeader('Vary'))
+      .expect(200, done);
+    });
   });
 
   describe('when existing Vary', function () {
@@ -393,4 +400,10 @@ function createServer(fn) {
       res.end();
     }
   });
+}
+
+function shouldNotHaveHeader(header) {
+  return function (res) {
+    assert.ok(!(header.toLowerCase() in res.headers), 'should not have header ' + header);
+  };
 }

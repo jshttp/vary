@@ -1,6 +1,6 @@
 /*!
  * vary
- * Copyright(c) 2014 Douglas Christopher Wilson
+ * Copyright(c) 2014-2015 Douglas Christopher Wilson
  * MIT Licensed
  */
 
@@ -108,5 +108,7 @@ function vary(res, field) {
     : String(val);
 
   // set new header
-  res.setHeader('Vary', append(header, field));
+  if ((val = append(header, field))) {
+    res.setHeader('Vary', val);
+  }
 }

@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * Fix setting empty header from empty `field`
+
 1.0.0 / 2014-08-10
 ==================
 
