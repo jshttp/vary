@@ -12,7 +12,7 @@
   "repository": "jshttp/vary",
   "devDependencies": {
     "istanbul": "0.3.17",
-    "mocha": "~1.21.4",
+    "mocha": "2.2.5",
     "supertest": "~0.13.0"
   },
   "files": [
