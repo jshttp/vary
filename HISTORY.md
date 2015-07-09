@@ -1,5 +1,5 @@
-unreleased
-==========
+1.0.1 / 2015-07-08
+==================
 
   * Fix setting empty header from empty `field`
   * perf: enable strict mode
