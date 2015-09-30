@@ -1,5 +1,5 @@
-unreleased
-==========
+1.1.0 / 2015-09-29
+==================
 
   * Only accept valid field names in the `field` argument
     - Ensures the resulting string is a valid HTTP header value
