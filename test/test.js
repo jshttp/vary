@@ -277,6 +277,11 @@ describe('vary.append(header, field)', function () {
       it('should not allow separator " "', function () {
         assert.throws(vary.append.bind(null, '', 'invalid header'), /field.*contains.*invalid/);
       });
+
+      it('should not allow non-token characters', function () {
+        assert.throws(vary.append.bind(null, '', 'invalid\nheader'), /field.*contains.*invalid/);
+        assert.throws(vary.append.bind(null, '', 'invalid\u0080header'), /field.*contains.*invalid/);
+      });
     });
   });
 
