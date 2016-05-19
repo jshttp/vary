@@ -24,7 +24,7 @@ module.exports.append = append
  *               ; any VCHAR, except delimiters
  */
 
-var fieldNameRegExp = /^[!#$%&'\*\+\-\.\^_`\|~0-9A-Za-z]+$/
+var FIELD_NAME_REGEXP = /^[!#$%&'\*\+\-\.\^_`\|~0-9A-Za-z]+$/
 
 /**
  * Append a field to a vary header.
@@ -51,7 +51,7 @@ function append (header, field) {
 
   // assert on invalid field names
   for (var j = 0; j < fields.length; j++) {
-    if (!fieldNameRegExp.test(fields[j])) {
+    if (!FIELD_NAME_REGEXP.test(fields[j])) {
       throw new TypeError('field argument contains an invalid header name')
     }
   }
