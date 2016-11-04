@@ -24,7 +24,7 @@ module.exports.append = append
  *               ; any VCHAR, except delimiters
  */
 
-var FIELD_NAME_REGEXP = /^[!#$%&'\*\+\-\.\^_`\|~0-9A-Za-z]+$/
+var FIELD_NAME_REGEXP = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/
 
 /**
  * Append a field to a vary header.
