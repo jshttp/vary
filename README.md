@@ -16,6 +16,8 @@ $ npm install vary
 
 ## API
 
+<!-- eslint-disable no-unused-vars -->
+
 ```js
 var vary = require('vary')
 ```
@@ -28,6 +30,8 @@ header, or an array of multiple fields.
 
 This will append the header if not already listed, otherwise leaves
 it listed in the current location.
+
+<!-- eslint-disable no-undef -->
 
 ```js
 // Append "Origin" to the Vary header of the response
@@ -43,6 +47,8 @@ or an array of multiple fields.
 This will append the header if not already listed, otherwise leaves
 it listed in the current location. The new header string is returned.
 
+<!-- eslint-disable no-undef -->
+
 ```js
 // Get header string appending "Origin" to "Accept, User-Agent"
 vary.append('Accept, User-Agent', 'Origin')
@@ -56,7 +62,7 @@ vary.append('Accept, User-Agent', 'Origin')
 var http = require('http')
 var vary = require('vary')
 
-http.createServer(function onRequest(req, res) {
+http.createServer(function onRequest (req, res) {
   // about to user-agent sniff
   vary(res, 'User-Agent')
 
