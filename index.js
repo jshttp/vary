@@ -32,7 +32,7 @@ var FIELD_NAME_REGEXP = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/
  * @param {String} header
  * @param {String|Array} field
  * @return {String}
- * @api public
+ * @public
  */
 
 function append (header, field) {
@@ -90,7 +90,7 @@ function append (header, field) {
  *
  * @param {String} header
  * @return {Array}
- * @api private
+ * @private
  */
 
 function parse (header) {
@@ -102,7 +102,7 @@ function parse (header) {
  *
  * @param {Object} res
  * @param {String|Array} field
- * @api public
+ * @public
  */
 
 function vary (res, field) {
