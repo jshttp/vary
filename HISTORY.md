@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * perf: hoist regular expression
+
 1.1.0 / 2015-09-29
 ==================
 
