@@ -1,5 +1,5 @@
-unreleased
-==========
+1.1.1 / 2017-03-20
+==================
 
   * perf: hoist regular expression
 
