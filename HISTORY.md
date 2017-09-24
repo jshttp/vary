@@ -1,5 +1,5 @@
-unreleased
-==========
+1.1.2 / 2017-09-23
+==================
 
   * perf: improve header token parsing speed
 
