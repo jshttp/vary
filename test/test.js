@@ -19,38 +19,38 @@ describe('vary(res, field)', function () {
     describe('field', function () {
       it('should be required', function (done) {
         request(createServer(callVary()))
-        .get('/')
-        .expect(500, /field.*required/, done)
+          .get('/')
+          .expect(500, /field.*required/, done)
       })
 
       it('should accept string', function (done) {
         request(createServer(callVary('foo')))
-        .get('/')
-        .expect(200, done)
+          .get('/')
+          .expect(200, done)
       })
 
       it('should accept array of string', function (done) {
         request(createServer(callVary(['foo', 'bar'])))
-        .get('/')
-        .expect(200, done)
+          .get('/')
+          .expect(200, done)
       })
 
       it('should accept string that is Vary header', function (done) {
         request(createServer(callVary('foo, bar')))
-        .get('/')
-        .expect(200, done)
+          .get('/')
+          .expect(200, done)
       })
 
       it('should not allow separator ":"', function (done) {
         request(createServer(callVary('invalid:header')))
-        .get('/')
-        .expect(500, /field.*contains.*invalid/, done)
+          .get('/')
+          .expect(500, /field.*contains.*invalid/, done)
       })
 
       it('should not allow separator " "', function (done) {
         request(createServer(callVary('invalid header')))
-        .get('/')
-        .expect(500, /field.*contains.*invalid/, done)
+          .get('/')
+          .expect(500, /field.*contains.*invalid/, done)
       })
     })
   })
@@ -58,39 +58,39 @@ describe('vary(res, field)', function () {
   describe('when no Vary', function () {
     it('should set value', function (done) {
       request(createServer(callVary('Origin')))
-      .get('/')
-      .expect('Vary', 'Origin')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Origin')
+        .expect(200, done)
     })
 
     it('should set value with multiple calls', function (done) {
       request(createServer(callVary(['Origin', 'User-Agent'])))
-      .get('/')
-      .expect('Vary', 'Origin, User-Agent')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Origin, User-Agent')
+        .expect(200, done)
     })
 
     it('should preserve case', function (done) {
       request(createServer(callVary(['ORIGIN', 'user-agent', 'AccepT'])))
-      .get('/')
-      .expect('Vary', 'ORIGIN, user-agent, AccepT')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'ORIGIN, user-agent, AccepT')
+        .expect(200, done)
     })
 
     it('should not set Vary on empty array', function (done) {
       request(createServer(callVary([])))
-      .get('/')
-      .expect(shouldNotHaveHeader('Vary'))
-      .expect(200, done)
+        .get('/')
+        .expect(shouldNotHaveHeader('Vary'))
+        .expect(200, done)
     })
   })
 
   describe('when existing Vary', function () {
     it('should set value', function (done) {
       request(createServer(alterVary('Accept', 'Origin')))
-      .get('/')
-      .expect('Vary', 'Accept, Origin')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept, Origin')
+        .expect(200, done)
     })
 
     it('should set value with multiple calls', function (done) {
@@ -100,143 +100,143 @@ describe('vary(res, field)', function () {
         vary(res, 'User-Agent')
       })
       request(server)
-      .get('/')
-      .expect('Vary', 'Accept, Origin, User-Agent')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept, Origin, User-Agent')
+        .expect(200, done)
     })
 
     it('should not duplicate existing value', function (done) {
       request(createServer(alterVary('Accept', 'Accept')))
-      .get('/')
-      .expect('Vary', 'Accept')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept')
+        .expect(200, done)
     })
 
     it('should compare case-insensitive', function (done) {
       request(createServer(alterVary('Accept', 'accEPT')))
-      .get('/')
-      .expect('Vary', 'Accept')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept')
+        .expect(200, done)
     })
 
     it('should preserve case', function (done) {
       request(createServer(alterVary('AccepT', ['accEPT', 'ORIGIN'])))
-      .get('/')
-      .expect('Vary', 'AccepT, ORIGIN')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'AccepT, ORIGIN')
+        .expect(200, done)
     })
   })
 
   describe('when existing Vary as array', function () {
     it('should set value', function (done) {
       request(createServer(alterVary(['Accept', 'Accept-Encoding'], 'Origin')))
-      .get('/')
-      .expect('Vary', 'Accept, Accept-Encoding, Origin')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept, Accept-Encoding, Origin')
+        .expect(200, done)
     })
 
     it('should not duplicate existing value', function (done) {
       request(createServer(alterVary(['Accept', 'Accept-Encoding'], ['accept', 'origin'])))
-      .get('/')
-      .expect('Vary', 'Accept, Accept-Encoding, origin')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept, Accept-Encoding, origin')
+        .expect(200, done)
     })
   })
 
   describe('when Vary: *', function () {
     it('should set value', function (done) {
       request(createServer(callVary('*')))
-      .get('/')
-      .expect('Vary', '*')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', '*')
+        .expect(200, done)
     })
 
     it('should act as if all values alread set', function (done) {
       request(createServer(alterVary('*', ['Origin', 'User-Agent'])))
-      .get('/')
-      .expect('Vary', '*')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', '*')
+        .expect(200, done)
     })
 
     it('should erradicate existing values', function (done) {
       request(createServer(alterVary('Accept, Accept-Encoding', '*')))
-      .get('/')
-      .expect('Vary', '*')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', '*')
+        .expect(200, done)
     })
 
     it('should update bad existing header', function (done) {
       request(createServer(alterVary('Accept, Accept-Encoding, *', 'Origin')))
-      .get('/')
-      .expect('Vary', '*')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', '*')
+        .expect(200, done)
     })
   })
 
   describe('when field is string', function () {
     it('should set value', function (done) {
       request(createServer(callVary('Accept')))
-      .get('/')
-      .expect('Vary', 'Accept')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept')
+        .expect(200, done)
     })
 
     it('should set value when vary header', function (done) {
       request(createServer(callVary('Accept, Accept-Encoding')))
-      .get('/')
-      .expect('Vary', 'Accept, Accept-Encoding')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept, Accept-Encoding')
+        .expect(200, done)
     })
 
     it('should acept LWS', function (done) {
       request(createServer(callVary('  Accept     ,     Origin    ')))
-      .get('/')
-      .expect('Vary', 'Accept, Origin')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept, Origin')
+        .expect(200, done)
     })
 
     it('should handle contained *', function (done) {
       request(createServer(callVary('Accept,*')))
-      .get('/')
-      .expect('Vary', '*')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', '*')
+        .expect(200, done)
     })
   })
 
   describe('when field is array', function () {
     it('should set value', function (done) {
       request(createServer(callVary(['Accept', 'Accept-Language'])))
-      .get('/')
-      .expect('Vary', 'Accept, Accept-Language')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept, Accept-Language')
+        .expect(200, done)
     })
 
     it('should ignore double-entries', function (done) {
       request(createServer(callVary(['Accept', 'Accept'])))
-      .get('/')
-      .expect('Vary', 'Accept')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept')
+        .expect(200, done)
     })
 
     it('should be case-insensitive', function (done) {
       request(createServer(callVary(['Accept', 'ACCEPT'])))
-      .get('/')
-      .expect('Vary', 'Accept')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept')
+        .expect(200, done)
     })
 
     it('should handle contained *', function (done) {
       request(createServer(callVary(['Origin', 'User-Agent', '*', 'Accept'])))
-      .get('/')
-      .expect('Vary', '*')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', '*')
+        .expect(200, done)
     })
 
     it('should handle existing values', function (done) {
       request(createServer(alterVary('Accept, Accept-Encoding', ['origin', 'accept', 'accept-charset'])))
-      .get('/')
-      .expect('Vary', 'Accept, Accept-Encoding, origin, accept-charset')
-      .expect(200, done)
+        .get('/')
+        .expect('Vary', 'Accept, Accept-Encoding, origin, accept-charset')
+        .expect(200, done)
     })
   })
 })
