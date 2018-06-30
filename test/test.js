@@ -287,95 +287,95 @@ describe('vary.append(header, field)', function () {
 
   describe('when header empty', function () {
     it('should set value', function () {
-      assert.equal(vary.append('', 'Origin'), 'Origin')
+      assert.strictEqual(vary.append('', 'Origin'), 'Origin')
     })
 
     it('should set value with array', function () {
-      assert.equal(vary.append('', ['Origin', 'User-Agent']), 'Origin, User-Agent')
+      assert.strictEqual(vary.append('', ['Origin', 'User-Agent']), 'Origin, User-Agent')
     })
 
     it('should preserve case', function () {
-      assert.equal(vary.append('', ['ORIGIN', 'user-agent', 'AccepT']), 'ORIGIN, user-agent, AccepT')
+      assert.strictEqual(vary.append('', ['ORIGIN', 'user-agent', 'AccepT']), 'ORIGIN, user-agent, AccepT')
     })
   })
 
   describe('when header has values', function () {
     it('should set value', function () {
-      assert.equal(vary.append('Accept', 'Origin'), 'Accept, Origin')
+      assert.strictEqual(vary.append('Accept', 'Origin'), 'Accept, Origin')
     })
 
     it('should set value with array', function () {
-      assert.equal(vary.append('Accept', ['Origin', 'User-Agent']), 'Accept, Origin, User-Agent')
+      assert.strictEqual(vary.append('Accept', ['Origin', 'User-Agent']), 'Accept, Origin, User-Agent')
     })
 
     it('should not duplicate existing value', function () {
-      assert.equal(vary.append('Accept', 'Accept'), 'Accept')
+      assert.strictEqual(vary.append('Accept', 'Accept'), 'Accept')
     })
 
     it('should compare case-insensitive', function () {
-      assert.equal(vary.append('Accept', 'accEPT'), 'Accept')
+      assert.strictEqual(vary.append('Accept', 'accEPT'), 'Accept')
     })
 
     it('should preserve case', function () {
-      assert.equal(vary.append('Accept', 'AccepT'), 'Accept')
+      assert.strictEqual(vary.append('Accept', 'AccepT'), 'Accept')
     })
   })
 
   describe('when *', function () {
     it('should set value', function () {
-      assert.equal(vary.append('', '*'), '*')
+      assert.strictEqual(vary.append('', '*'), '*')
     })
 
     it('should act as if all values already set', function () {
-      assert.equal(vary.append('*', 'Origin'), '*')
+      assert.strictEqual(vary.append('*', 'Origin'), '*')
     })
 
     it('should erradicate existing values', function () {
-      assert.equal(vary.append('Accept, Accept-Encoding', '*'), '*')
+      assert.strictEqual(vary.append('Accept, Accept-Encoding', '*'), '*')
     })
 
     it('should update bad existing header', function () {
-      assert.equal(vary.append('Accept, Accept-Encoding, *', 'Origin'), '*')
+      assert.strictEqual(vary.append('Accept, Accept-Encoding, *', 'Origin'), '*')
     })
   })
 
   describe('when field is string', function () {
     it('should set value', function () {
-      assert.equal(vary.append('', 'Accept'), 'Accept')
+      assert.strictEqual(vary.append('', 'Accept'), 'Accept')
     })
 
     it('should set value when vary header', function () {
-      assert.equal(vary.append('', 'Accept, Accept-Encoding'), 'Accept, Accept-Encoding')
+      assert.strictEqual(vary.append('', 'Accept, Accept-Encoding'), 'Accept, Accept-Encoding')
     })
 
     it('should acept LWS', function () {
-      assert.equal(vary.append('', '  Accept     ,     Origin    '), 'Accept, Origin')
+      assert.strictEqual(vary.append('', '  Accept     ,     Origin    '), 'Accept, Origin')
     })
 
     it('should handle contained *', function () {
-      assert.equal(vary.append('', 'Accept,*'), '*')
+      assert.strictEqual(vary.append('', 'Accept,*'), '*')
     })
   })
 
   describe('when field is array', function () {
     it('should set value', function () {
-      assert.equal(vary.append('', ['Accept', 'Accept-Language']), 'Accept, Accept-Language')
+      assert.strictEqual(vary.append('', ['Accept', 'Accept-Language']), 'Accept, Accept-Language')
     })
 
     it('should ignore double-entries', function () {
-      assert.equal(vary.append('', ['Accept', 'Accept']), 'Accept')
+      assert.strictEqual(vary.append('', ['Accept', 'Accept']), 'Accept')
     })
 
     it('should be case-insensitive', function () {
-      assert.equal(vary.append('', ['Accept', 'ACCEPT']), 'Accept')
+      assert.strictEqual(vary.append('', ['Accept', 'ACCEPT']), 'Accept')
     })
 
     it('should handle contained *', function () {
-      assert.equal(vary.append('', ['Origin', 'User-Agent', '*', 'Accept']), '*')
+      assert.strictEqual(vary.append('', ['Origin', 'User-Agent', '*', 'Accept']), '*')
     })
 
     it('should handle existing values', function () {
-      assert.equal(vary.append('Accept, Accept-Encoding', ['origin', 'accept', 'accept-charset']), 'Accept, Accept-Encoding, origin, accept-charset')
+      assert.strictEqual(vary.append('Accept, Accept-Encoding', ['origin', 'accept', 'accept-charset']), 'Accept, Accept-Encoding, origin, accept-charset')
     })
   })
 })
