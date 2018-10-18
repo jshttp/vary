@@ -1,7 +1,7 @@
 # vary
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
+[![NPM Version][npm-version-image]][npm-url]
+[![NPM Downloads][npm-downloads-image]][npm-url]
 [![Node.js Version][node-version-image]][node-version-url]
 [![Build Status][travis-image]][travis-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
@@ -89,13 +89,12 @@ $ npm test
 
 [MIT](LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/vary.svg
-[npm-url]: https://npmjs.org/package/vary
-[node-version-image]: https://img.shields.io/node/v/vary.svg
+[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/vary/master
+[coveralls-url]: https://coveralls.io/r/jshttp/vary?branch=master
+[node-version-image]: https://badgen.net/npm/node/vary
 [node-version-url]: https://nodejs.org/en/download
-[travis-image]: https://img.shields.io/travis/jshttp/vary/master.svg
+[npm-downloads-image]: https://badgen.net/npm/dm/vary
+[npm-url]: https://npmjs.org/package/vary
+[npm-version-image]: https://badgen.net/npm/v/vary
+[travis-image]: https://badgen.net/travis/jshttp/vary/master
 [travis-url]: https://travis-ci.org/jshttp/vary
-[coveralls-image]: https://img.shields.io/coveralls/jshttp/vary/master.svg
-[coveralls-url]: https://coveralls.io/r/jshttp/vary
-[downloads-image]: https://img.shields.io/npm/dm/vary.svg
-[downloads-url]: https://npmjs.org/package/vary
