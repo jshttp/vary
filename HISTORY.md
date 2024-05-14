@@ -26,7 +26,7 @@
 
   * Accept valid `Vary` header string as `field`
   * Add `vary.append` for low-level string manipulation
-  * Move to `jshttp` orgainzation
+  * Move to `jshttp` organization
 
 0.1.0 / 2014-06-05
 ==================
