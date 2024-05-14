@@ -3,8 +3,8 @@
 [![NPM Version][npm-version-image]][npm-url]
 [![NPM Downloads][npm-downloads-image]][npm-url]
 [![Node.js Version][node-version-image]][node-version-url]
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+[![Build Status][ci-image]][ci-url]
+[![Coverage Status][coveralls-image]][coveralls-url]
 
 Manipulate the HTTP Vary header
 
@@ -89,6 +89,9 @@ $ npm test
 
 [MIT](LICENSE)
 
+
+[ci-image]: https://badgen.net/github/checks/jshttp/vary/master?label=ci
+[ci-url]: https://github.com/jshttp/vary/actions/workflows/ci.yml
 [coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/vary/master
 [coveralls-url]: https://coveralls.io/r/jshttp/vary?branch=master
 [node-version-image]: https://badgen.net/npm/node/vary
@@ -96,5 +99,3 @@ $ npm test
 [npm-downloads-image]: https://badgen.net/npm/dm/vary
 [npm-url]: https://npmjs.org/package/vary
 [npm-version-image]: https://badgen.net/npm/v/vary
-[travis-image]: https://badgen.net/travis/jshttp/vary/master
-[travis-url]: https://travis-ci.org/jshttp/vary
