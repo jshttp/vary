@@ -160,7 +160,7 @@ jobs:
           npm-rm: beautify-benchmark benchmark
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v6.0.2
 
     - name: Install Node.js ${{ matrix.node-version }}
       shell: bash -eo pipefail -l {0}
