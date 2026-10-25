@@ -357,6 +357,29 @@ describe('vary.append(header, field)', function () {
     })
   })
 
+  describe('when optional whitespace includes tabs', function () {
+    it('should trim tabs around supplied field names', function () {
+      assert.strictEqual(vary.append('', '\t Accept\t, \tOrigin \t'), 'Accept, Origin')
+    })
+
+    it('should recognize existing field names surrounded by tabs', function () {
+      var header = '\tAccept\t,\tOrigin\t'
+      assert.strictEqual(vary.append(header, ['accept', 'origin']), header)
+    })
+
+    it('should recognize an existing wildcard surrounded by tabs', function () {
+      assert.strictEqual(vary.append('Accept,\t*\t', 'Origin'), '*')
+    })
+
+    it('should recognize a supplied wildcard surrounded by tabs', function () {
+      assert.strictEqual(vary.append('Accept', '\t*\t'), '*')
+    })
+
+    it('should reject tabs inside supplied field names', function () {
+      assert.throws(vary.append.bind(null, '', 'Accept\tEncoding'), /field.*contains.*invalid/)
+    })
+  })
+
   describe('when field is array', function () {
     it('should set value', function () {
       assert.strictEqual(vary.append('', ['Accept', 'Accept-Language']), 'Accept, Accept-Language')
