@@ -14,6 +14,11 @@ describe('vary(res, field)', function () {
       it('should not allow non-res-like objects', function () {
         assert.throws(vary.bind(null, {}), /res.*required/)
       })
+
+      it('should not allow res-like objects without setHeader', function () {
+        var res = { getHeader: function () {} }
+        assert.throws(vary.bind(null, res, 'Origin'), /res.*required/)
+      })
     })
 
     describe('field', function () {
