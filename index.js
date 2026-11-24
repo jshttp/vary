@@ -101,7 +101,8 @@ function parse (header) {
   // gather tokens
   for (var i = 0, len = header.length; i < len; i++) {
     switch (header.charCodeAt(i)) {
-      case 0x20: /*   */
+      case 0x09: /* HTAB */
+      case 0x20: /* SP */
         if (start === end) {
           start = end = i + 1
         }
