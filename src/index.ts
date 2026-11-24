@@ -5,7 +5,7 @@
  */
 
 // HTTP field names are tokens.
-const FIELD_NAME_REGEXP = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+const INVALID_FIELD_NAME = /^$|[^!#$%&'*+\-.^_`|~0-9A-Za-z]/;
 
 /**
  * A response with methods for reading and setting headers.
@@ -22,73 +22,75 @@ export function append(
   header: string,
   field: string | readonly string[],
 ): string {
-  if (typeof header !== "string") {
-    throw new TypeError("header argument is required");
-  }
-
-  if (!field) {
-    throw new TypeError("field argument is required");
-  }
-
-  const fields = Array.isArray(field) ? field : parse(String(field));
-
-  for (let i = 0; i < fields.length; i++) {
-    if (!FIELD_NAME_REGEXP.test(fields[i])) {
-      throw new TypeError("field argument contains an invalid header name");
-    }
-  }
-
-  if (header === "*") {
-    return header;
-  }
-
   const values = parse(header.toLowerCase());
+  const fields = Array.isArray(field) ? field : parse(String(field));
+  let wildcard = values.includes("*");
+  let result = header;
 
-  if (fields.indexOf("*") !== -1 || values.indexOf("*") !== -1) {
-    return "*";
-  }
+  for (const name of fields) {
+    if (INVALID_FIELD_NAME.test(name)) invalidFieldName(name);
 
-  let value = header;
-  for (let i = 0; i < fields.length; i++) {
-    const name = fields[i];
     const lower = name.toLowerCase();
-
-    if (values.indexOf(lower) === -1) {
+    if (lower === "*") wildcard = true;
+    if (!values.includes(lower)) {
       values.push(lower);
-      value = value ? value + ", " + name : name;
+      result = result ? result + ", " + name : name;
     }
   }
 
-  return value;
+  return wildcard ? "*" : result;
 }
 
 /**
- * Parse a Vary header into an array.
+ * Format field names as a Vary header.
  */
-function parse(header: string): string[] {
-  let start = 0;
-  let end = 0;
-  const list: string[] = [];
+export function format(fields: readonly string[]): string {
+  if (fields.length === 0) return "";
 
-  for (let i = 0; i < header.length; i++) {
-    switch (header.charCodeAt(i)) {
-      case 0x09: // Horizontal tab
-      case 0x20: // Space
-        if (start === end) {
-          start = end = i + 1;
-        }
-        break;
-      case 0x2c: // Comma
-        list.push(header.substring(start, end));
-        start = end = i + 1;
-        break;
-      default:
-        end = i + 1;
-        break;
-    }
+  const first = fields[0];
+  if (INVALID_FIELD_NAME.test(first)) invalidFieldName(first);
+  let result = first;
+
+  for (let i = 1; i < fields.length; i++) {
+    const name = fields[i];
+    if (INVALID_FIELD_NAME.test(name)) invalidFieldName(name);
+    result = result + ", " + name;
   }
 
-  list.push(header.substring(start, end));
+  return result;
+}
+
+function invalidFieldName(name: string): never {
+  throw new TypeError(`Vary field contains invalid characters: ${name}`);
+}
+
+/**
+ * Parse the non-empty members of a Vary header.
+ */
+export function parse(header: string): string[] {
+  const list: string[] = [];
+  const length = header.length;
+  let start = 0;
+
+  while (start < length) {
+    // Trim spaces and horizontal tabs at the member's edges.
+    do {
+      const code = header.charCodeAt(start);
+      if (code !== 0x20 && code !== 0x09) break;
+      start++;
+    } while (start < length);
+
+    const comma = header.indexOf(",", start);
+    let end = comma === -1 ? length : comma;
+    while (end > start) {
+      const code = header.charCodeAt(end - 1);
+      if (code !== 0x20 && code !== 0x09) break;
+      end--;
+    }
+
+    if (start < end) list.push(header.slice(start, end));
+    start = end + 1;
+  }
 
   return list;
 }
@@ -97,19 +99,9 @@ function parse(header: string): string[] {
  * Add one or more fields to a response's Vary header.
  */
 export function vary(res: Response, field: string | readonly string[]): void {
-  if (!res || !res.getHeader || !res.setHeader) {
-    throw new TypeError("res argument is required");
-  }
-
-  const value = res.getHeader("Vary") || "";
+  const value = res.getHeader("Vary") ?? "";
   const header = Array.isArray(value) ? value.join(", ") : String(value);
+
   const updated = append(header, field);
-
-  if (updated) {
-    res.setHeader("Vary", updated);
-  }
+  if (updated) res.setHeader("Vary", updated);
 }
-
-vary.append = append;
-
-export default vary;

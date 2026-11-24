@@ -6,36 +6,25 @@
 [![Build Status][ci-image]][ci-url]
 [![Coverage Status][codecov-image]][codecov-url]
 
-Manipulate the HTTP Vary header
+Manipulate the HTTP `Vary` header.
 
 ## Installation
-
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally).
 
 ```sh
 npm install vary
 ```
 
-Requires Node.js 22 or later.
-
 ## API
 
 ```js
-import { append, vary } from "vary";
+import { vary, append, format, parse } from "vary";
 ```
-
-The default import is also callable and exposes `vary.append`.
 
 ### vary(res, field)
 
-Adds the given header `field` to the `Vary` response header of `res`.
-This can be a string of a single field, a string of a valid `Vary`
-header, or an array of multiple fields.
+Adds the given header `field` to the `Vary` response header of `res`. This can be a string of a single field, a string of a valid `Vary` header, or an array of multiple fields.
 
-This will append the header if not already listed, otherwise leaves
-it listed in the current location.
+This will append the header if not already listed, otherwise leaves it listed in the current location.
 
 ```js
 // Append "Origin" to the Vary header of the response
@@ -44,16 +33,29 @@ vary(res, "Origin");
 
 ### append(header, field)
 
-Adds the given header `field` to the `Vary` response header string `header`.
-This can be a string of a single field, a string of a valid `Vary` header,
-or an array of multiple fields.
+Returns the updated `Vary` header string after adding `field` to `header`. Pass a single field name, a comma-separated string of field names, or an array of field names.
 
-This will append the header if not already listed, otherwise leaves
-it listed in the current location. The new header string is returned.
+Field names are compared case-insensitively. Each new name is appended and existing names stay in place. If either argument contains a wildcard `*`, the result is `"*"`. Invalid field names in `field` throw a `TypeError`.
 
 ```js
 // Get header string appending "Origin" to "Accept, User-Agent"
 append("Accept, User-Agent", "Origin");
+```
+
+### parse(header)
+
+Splits a `Vary` header into an array of strings.
+
+```js
+parse("Accept-Encoding, Origin"); // ["Accept-Encoding", "Origin"]
+```
+
+### format(fields)
+
+Validates and joins field names with `, `, preserving all fields as-is. Invalid field names throw a `TypeError`.
+
+```js
+format(["Accept-Encoding", "Origin", "origin"]); // "Accept-Encoding, Origin, origin"
 ```
 
 ## Examples
@@ -61,20 +63,8 @@ append("Accept, User-Agent", "Origin");
 ### Updating the Vary header when content is based on it
 
 ```js
-import { createServer } from "node:http";
-import { vary } from "vary";
-
-createServer(function onRequest(req, res) {
-  // about to user-agent sniff
-  vary(res, "User-Agent");
-
-  const ua = req.headers["user-agent"] || "";
-  const isMobile = /mobi|android|touch|mini/i.test(ua);
-
-  // serve site, depending on isMobile
-  res.setHeader("Content-Type", "text/html");
-  res.end("You are (probably) " + (isMobile ? "" : "not ") + "a mobile user");
-});
+// In a request handler that serves content based on the User-Agent header
+vary(res, "User-Agent");
 ```
 
 ## License
