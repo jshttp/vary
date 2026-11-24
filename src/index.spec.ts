@@ -1,246 +1,99 @@
-import { once } from "node:events";
-import { createServer, type RequestListener } from "node:http";
-import { describe, expect, it } from "vitest";
-import { append, vary } from "./index.js";
+import { IncomingMessage, ServerResponse } from "node:http";
+import { Socket } from "node:net";
+import { describe, expect, expectTypeOf, it } from "vitest";
+import { append, format, parse, vary, type Response } from "./index.js";
 
 describe("vary(res, field)", () => {
-  describe("arguments", () => {
-    describe("res", () => {
-      it("should be required", () => {
-        expect(() => {
-          // @ts-expect-error testing omitted arguments at runtime
-          vary();
-        }).toThrow(/res.*required/);
-      });
-
-      it("should not allow non-res-like objects", () => {
-        expect(() => {
-          // @ts-expect-error testing an invalid response at runtime
-          vary({}, "Accept");
-        }).toThrow(/res.*required/);
-      });
-    });
-
-    describe("field", () => {
-      it("should be required", async () => {
-        // @ts-expect-error testing an omitted field at runtime
-        await expectResponse(callVary(), 500, /field.*required/);
-      });
-
-      it("should accept string", async () => {
-        await expectResponse(callVary("foo"), 200);
-      });
-
-      it("should accept array of string", async () => {
-        await expectResponse(callVary(["foo", "bar"]), 200);
-      });
-
-      it("should accept string that is Vary header", async () => {
-        await expectResponse(callVary("foo, bar"), 200);
-      });
-
-      it('should not allow separator ":"', async () => {
-        await expectResponse(
-          callVary("invalid:header"),
-          500,
-          /field.*contains.*invalid/,
-        );
-      });
-
-      it('should not allow separator " "', async () => {
-        await expectResponse(
-          callVary("invalid header"),
-          500,
-          /field.*contains.*invalid/,
-        );
-      });
-    });
+  it("should accept Node's ServerResponse as a Response", () => {
+    expectTypeOf<ServerResponse>().toExtend<Response>();
   });
 
-  describe("when no Vary", () => {
-    it("should set value", async () => {
-      await expectResponse(callVary("Origin"), 200, "Origin");
-    });
+  it("should require a response with header methods", () => {
+    expect(() => {
+      // @ts-expect-error testing omitted arguments at runtime
+      vary();
+    }).toThrow(TypeError);
 
-    it("should set value with multiple calls", async () => {
-      await expectResponse(
-        callVary(["Origin", "User-Agent"]),
-        200,
-        "Origin, User-Agent",
-      );
-    });
-
-    it("should preserve case", async () => {
-      await expectResponse(
-        callVary(["ORIGIN", "user-agent", "AccepT"]),
-        200,
-        "ORIGIN, user-agent, AccepT",
-      );
-    });
-
-    it("should not set Vary on empty array", async () => {
-      await expectResponse(callVary([]), 200, null);
-    });
+    expect(() => {
+      // @ts-expect-error testing an invalid response at runtime
+      vary({}, "Accept");
+    }).toThrow(TypeError);
   });
 
-  describe("when existing Vary", () => {
-    it("should set value", async () => {
-      await expectResponse(
-        alterVary("Accept", "Origin"),
-        200,
-        "Accept, Origin",
-      );
-    });
+  it.each([
+    ["Origin", "Origin"],
+    [["Origin", "User-Agent"], "Origin, User-Agent"],
+    [["ORIGIN", "user-agent", "AccepT"], "ORIGIN, user-agent, AccepT"],
+    [[], undefined],
+    ["Accept, Accept-Encoding", "Accept, Accept-Encoding"],
+    ["  Accept     ,     Origin    ", "Accept, Origin"],
+    [["Accept", "Accept-Language"], "Accept, Accept-Language"],
+    [["Accept", "Accept"], "Accept"],
+    [["Accept", "ACCEPT"], "Accept"],
+    ["*", "*"],
+    ["Accept,*", "*"],
+    [["Origin", "User-Agent", "*", "Accept"], "*"],
+  ])("should set Vary from %j to %j", (field, expected) => {
+    const res = new ServerResponse(new IncomingMessage(new Socket()));
 
-    it("should set value with multiple calls", async () => {
-      await expectResponse(
-        (_req, res) => {
-          res.setHeader("Vary", "Accept");
-          vary(res, "Origin");
-          vary(res, "User-Agent");
-        },
-        200,
-        "Accept, Origin, User-Agent",
-      );
-    });
+    vary(res, field);
 
-    it("should not duplicate existing value", async () => {
-      await expectResponse(alterVary("Accept", "Accept"), 200, "Accept");
-    });
-
-    it("should compare case-insensitive", async () => {
-      await expectResponse(alterVary("Accept", "accEPT"), 200, "Accept");
-    });
-
-    it("should preserve case", async () => {
-      await expectResponse(
-        alterVary("AccepT", ["accEPT", "ORIGIN"]),
-        200,
-        "AccepT, ORIGIN",
-      );
-    });
+    expect(res.getHeader("Vary")).toBe(expected);
   });
 
-  describe("when existing Vary as array", () => {
-    it("should set value", async () => {
-      await expectResponse(
-        alterVary(["Accept", "Accept-Encoding"], "Origin"),
-        200,
-        "Accept, Accept-Encoding, Origin",
-      );
-    });
+  it.each([
+    ["Accept", "Origin", "Accept, Origin"],
+    ["Accept", "Accept", "Accept"],
+    ["Accept", "accEPT", "Accept"],
+    ["AccepT", ["accEPT", "ORIGIN"], "AccepT, ORIGIN"],
+    [
+      ["Accept", "Accept-Encoding"],
+      "Origin",
+      "Accept, Accept-Encoding, Origin",
+    ],
+    [
+      ["Accept", "Accept-Encoding"],
+      ["accept", "origin"],
+      "Accept, Accept-Encoding, origin",
+    ],
+    [0, "Origin", "0, Origin"],
+    ["*", ["Origin", "User-Agent"], "*"],
+    ["Accept, Accept-Encoding", "*", "*"],
+    ["Accept, Accept-Encoding, *", "Origin", "*"],
+    [
+      "Accept, Accept-Encoding",
+      ["origin", "accept", "accept-charset"],
+      "Accept, Accept-Encoding, origin, accept-charset",
+    ],
+  ])("should update Vary %j with %j", (header, field, expected) => {
+    const res = new ServerResponse(new IncomingMessage(new Socket()));
+    res.setHeader("Vary", header);
 
-    it("should not duplicate existing value", async () => {
-      await expectResponse(
-        alterVary(["Accept", "Accept-Encoding"], ["accept", "origin"]),
-        200,
-        "Accept, Accept-Encoding, origin",
-      );
-    });
+    vary(res, field);
+
+    expect(res.getHeader("Vary")).toBe(expected);
   });
 
-  describe("when Vary: *", () => {
-    it("should set value", async () => {
-      await expectResponse(callVary("*"), 200, "*");
-    });
+  it("should append fields across multiple calls", () => {
+    const res = new ServerResponse(new IncomingMessage(new Socket()));
+    res.setHeader("Vary", "Accept");
 
-    it("should act as if all values already set", async () => {
-      await expectResponse(alterVary("*", ["Origin", "User-Agent"]), 200, "*");
-    });
+    vary(res, "Origin");
+    vary(res, "User-Agent");
 
-    it("should remove existing values", async () => {
-      await expectResponse(alterVary("Accept, Accept-Encoding", "*"), 200, "*");
-    });
-
-    it("should update bad existing header", async () => {
-      await expectResponse(
-        alterVary("Accept, Accept-Encoding, *", "Origin"),
-        200,
-        "*",
-      );
-    });
+    expect(res.getHeader("Vary")).toBe("Accept, Origin, User-Agent");
   });
 
-  describe("when field is string", () => {
-    it("should set value", async () => {
-      await expectResponse(callVary("Accept"), 200, "Accept");
-    });
+  it.each(["invalid:header", "invalid header"])(
+    "should reject %j without changing Vary",
+    (field) => {
+      const res = new ServerResponse(new IncomingMessage(new Socket()));
+      res.setHeader("Vary", "Accept");
 
-    it("should set value when vary header", async () => {
-      await expectResponse(
-        callVary("Accept, Accept-Encoding"),
-        200,
-        "Accept, Accept-Encoding",
-      );
-    });
-
-    it("should accept LWS", async () => {
-      await expectResponse(
-        callVary("  Accept     ,     Origin    "),
-        200,
-        "Accept, Origin",
-      );
-    });
-
-    it("should handle contained *", async () => {
-      await expectResponse(callVary("Accept,*"), 200, "*");
-    });
-  });
-
-  describe("when optional whitespace includes tabs", () => {
-    it.each([
-      ["", "\t Accept\t, \tOrigin \t", "Accept, Origin"],
-      ["\tAccept\t,\tOrigin\t", ["accept", "origin"], "\tAccept\t,\tOrigin\t"],
-      ["Accept,\t*\t", "Origin", "*"],
-      ["Accept", "\t*\t", "*"],
-    ])("should append to %j with field %j", (header, field, expected) => {
-      expect(append(header, field)).toBe(expected);
-    });
-
-    it("should reject tabs inside supplied field names", () => {
-      expect(() => append("", "Accept\tEncoding")).toThrow(
-        /field.*contains.*invalid/,
-      );
-    });
-  });
-
-  describe("when field is array", () => {
-    it("should set value", async () => {
-      await expectResponse(
-        callVary(["Accept", "Accept-Language"]),
-        200,
-        "Accept, Accept-Language",
-      );
-    });
-
-    it("should ignore double-entries", async () => {
-      await expectResponse(callVary(["Accept", "Accept"]), 200, "Accept");
-    });
-
-    it("should be case-insensitive", async () => {
-      await expectResponse(callVary(["Accept", "ACCEPT"]), 200, "Accept");
-    });
-
-    it("should handle contained *", async () => {
-      await expectResponse(
-        callVary(["Origin", "User-Agent", "*", "Accept"]),
-        200,
-        "*",
-      );
-    });
-
-    it("should handle existing values", async () => {
-      await expectResponse(
-        alterVary("Accept, Accept-Encoding", [
-          "origin",
-          "accept",
-          "accept-charset",
-        ]),
-        200,
-        "Accept, Accept-Encoding, origin, accept-charset",
-      );
-    });
-  });
+      expect(() => vary(res, field)).toThrow(/field.*contains.*invalid/);
+      expect(res.getHeader("Vary")).toBe("Accept");
+    },
+  );
 });
 
 describe("append(header, field)", () => {
@@ -250,25 +103,18 @@ describe("append(header, field)", () => {
         expect(() => {
           // @ts-expect-error testing an invalid call at runtime
           append();
-        }).toThrow(/header.*required/);
+        }).toThrow(TypeError);
       });
 
       it("should be a string", () => {
         expect(() => {
           // @ts-expect-error testing an invalid call at runtime
           append(42);
-        }).toThrow(/header.*required/);
+        }).toThrow(TypeError);
       });
     });
 
     describe("field", () => {
-      it("should be required", () => {
-        expect(() => {
-          // @ts-expect-error testing an invalid call at runtime
-          append("");
-        }).toThrow(/field.*required/);
-      });
-
       it("should accept string", () => {
         expect(() => append("", "foo")).not.toThrow();
       });
@@ -342,6 +188,18 @@ describe("append(header, field)", () => {
     it("should preserve case", () => {
       expect(append("Accept", "AccepT")).toBe("Accept");
     });
+
+    it("should preserve the existing header when adding formatted fields", () => {
+      expect(append("Accept,\tOrigin", ["accept", "X-Foo", "x-foo"])).toBe(
+        "Accept,\tOrigin, X-Foo",
+      );
+    });
+
+    it("should reject an invalid field even when it is already listed", () => {
+      expect(() => append("invalid:header", "invalid:header")).toThrow(
+        TypeError,
+      );
+    });
   });
 
   describe("when *", () => {
@@ -351,6 +209,13 @@ describe("append(header, field)", () => {
 
     it("should act as if all values already set", () => {
       expect(append("*", "Origin")).toBe("*");
+    });
+
+    it("should still validate new field names", () => {
+      expect(() => append("*", "invalid:header")).toThrow(TypeError);
+      expect(() => append("Origin", ["*", "invalid:header"])).toThrow(
+        TypeError,
+      );
     });
 
     it("should remove existing values", () => {
@@ -379,8 +244,33 @@ describe("append(header, field)", () => {
       );
     });
 
+    it.each([
+      [", Accept, , Origin,", "Accept, Origin"],
+      [" ,\t, ", "Accept"],
+      ["", "Accept"],
+    ])("should skip empty members in %j", (field, expected) => {
+      expect(append("Accept", field)).toBe(expected);
+    });
+
     it("should handle contained *", () => {
       expect(append("", "Accept,*")).toBe("*");
+    });
+  });
+
+  describe("when optional whitespace includes tabs", () => {
+    it.each([
+      ["", "\t Accept\t, \tOrigin \t", "Accept, Origin"],
+      ["\tAccept\t,\tOrigin\t", ["accept", "origin"], "\tAccept\t,\tOrigin\t"],
+      ["Accept,\t*\t", "Origin", "*"],
+      ["Accept", "\t*\t", "*"],
+    ])("should append to %j with field %j", (header, field, expected) => {
+      expect(append(header, field)).toBe(expected);
+    });
+
+    it("should reject tabs inside supplied field names", () => {
+      expect(() => append("", "Accept\tEncoding")).toThrow(
+        /field.*contains.*invalid/,
+      );
     });
   });
 
@@ -415,53 +305,30 @@ describe("append(header, field)", () => {
   });
 });
 
-function alterVary(
-  header: string | string[],
-  field: string | string[],
-): RequestListener {
-  return (_req, res) => {
-    res.setHeader("Vary", header);
-    vary(res, field);
-  };
-}
+describe("parse(header)", () => {
+  it.each([
+    ["", []],
+    ["foo bar, x y, whatever", ["foo bar", "x y", "whatever"]],
+    ["\t\u0000X \tY\u00a0 ", ["\u0000X \tY\u00a0"]],
+    [" ,\t, ", []],
+    [" ,\tAccept\t, , accept, Origin, ", ["Accept", "accept", "Origin"]],
+    ["Accept, *", ["Accept", "*"]],
+  ])("should parse %j", (header, expected) => {
+    expect(parse(header)).toEqual(expected);
+  });
+});
 
-function callVary(field: string | string[]): RequestListener {
-  return (_req, res) => {
-    vary(res, field);
-  };
-}
-
-async function expectResponse(
-  handler: RequestListener,
-  status: number,
-  expected?: string | null | RegExp,
-): Promise<void> {
-  const server = createServer((req, res) => {
-    try {
-      handler(req, res);
-      res.statusCode = 200;
-      res.end();
-    } catch (error) {
-      res.statusCode = 500;
-      res.end(error instanceof Error ? error.message : String(error));
-    }
+describe("format(fields)", () => {
+  it.each([
+    ["", ""],
+    ["\tAccept, Origin, accept, Accept", "Accept, Origin, accept, Accept"],
+    ["Accept, *, Origin", "Accept, *, Origin"],
+  ])("should format the fields parsed from %j", (header, expected) => {
+    expect(format(parse(header))).toBe(expected);
   });
 
-  server.listen(0, "127.0.0.1");
-  await once(server, "listening");
-  await using listeningServer = server;
-  const address = listeningServer.address();
-  if (!address || typeof address === "string") {
-    throw new Error("Expected a TCP server");
-  }
-
-  const response = await fetch(`http://127.0.0.1:${address.port}`);
-  const body = await response.text();
-  expect(response.status).toBe(status);
-
-  if (expected instanceof RegExp) {
-    expect(body).toMatch(expected);
-  } else if (expected !== undefined) {
-    expect(response.headers.get("vary")).toBe(expected);
-  }
-}
+  it("should reject invalid field names", () => {
+    expect(() => format([""])).toThrow(TypeError);
+    expect(() => format(["*", "invalid:header"])).toThrow(TypeError);
+  });
+});
